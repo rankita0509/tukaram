@@ -1,0 +1,280 @@
+APPLICATION NAME : Student_Info
+
+*******************************************************************
+
+activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <!-- EditText for Roll No -->
+    <EditText
+        android:id="@+id/etRollNo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter Roll No"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- EditText for Name -->
+    <EditText
+        android:id="@+id/etName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter Name"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etRollNo" />
+
+    <!-- EditText for Age -->
+    <EditText
+        android:id="@+id/etAge"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter Age"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etName" />
+
+    <!-- Button to Add Student -->
+    <Button
+        android:id="@+id/btnAddStudent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Student"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etAge" />
+
+    <!-- ListView to Display Students -->
+    <ListView
+        android:id="@+id/lvStudents"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnAddStudent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+***********************************************************************************
+
+
+acitivity.kt
+
+
+
+
+package com.example.student_info
+
+import android.database.Cursor
+import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var dbHelper: StudentDatabaseHelper
+    private lateinit var etRollNo: EditText
+    private lateinit var etName: EditText
+    private lateinit var etAge: EditText
+    private lateinit var btnAddStudent: Button
+    private lateinit var lvStudents: ListView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        dbHelper = StudentDatabaseHelper(this)
+        etRollNo = findViewById(R.id.etRollNo)
+        etName = findViewById(R.id.etName)
+        etAge = findViewById(R.id.etAge)
+        btnAddStudent = findViewById(R.id.btnAddStudent)
+        lvStudents = findViewById(R.id.lvStudents)
+
+        // Button click to add student
+        btnAddStudent.setOnClickListener {
+            val rollNo = etRollNo.text.toString()
+            val name = etName.text.toString()
+            val age = etAge.text.toString().toIntOrNull()
+
+            if (rollNo.isNotEmpty() && name.isNotEmpty() && age != null) {
+                val result = dbHelper.insertStudent(rollNo, name, age)
+                if (result > 0) {
+                    Toast.makeText(this, "Student Added", Toast.LENGTH_SHORT).show()
+                    loadStudentList()
+                } else {
+                    Toast.makeText(this, "Error Adding Student", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Please enter valid data", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Load students in ListView
+        loadStudentList()
+    }
+
+    private fun loadStudentList() {
+        val cursor: Cursor = dbHelper.getAllStudents()
+
+        // Ensure cursor is not empty before proceeding
+        if (cursor.count > 0) {
+            val studentsList = mutableListOf<String>()
+            while (cursor.moveToNext()) {
+                // Ensure the column indices are valid
+                val idIndex = cursor.getColumnIndex(StudentDatabaseHelper.COL_ID)
+                val rollNoIndex = cursor.getColumnIndex(StudentDatabaseHelper.COL_ROLL_NO)
+                val nameIndex = cursor.getColumnIndex(StudentDatabaseHelper.COL_NAME)
+                val ageIndex = cursor.getColumnIndex(StudentDatabaseHelper.COL_AGE)
+
+                // Check if the indices are valid (≥ 0)
+                if (idIndex >= 0 && rollNoIndex >= 0 && nameIndex >= 0 && ageIndex >= 0) {
+                    val id = cursor.getInt(idIndex)
+                    val rollNo = cursor.getString(rollNoIndex)
+                    val name = cursor.getString(nameIndex)
+                    val age = cursor.getInt(ageIndex)
+                    studentsList.add("ID: $id, Roll No: $rollNo, Name: $name, Age: $age")
+                }
+            }
+            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, studentsList)
+            lvStudents.adapter = adapter
+        } else {
+            Toast.makeText(this, "No students found", Toast.LENGTH_SHORT).show()
+        }
+        cursor.close()
+    }
+
+    private fun deleteStudent(studentId: Int) {
+        val result = dbHelper.deleteStudent(studentId)
+        if (result > 0) {
+            Toast.makeText(this, "Student Deleted", Toast.LENGTH_SHORT).show()
+            loadStudentList()
+        } else {
+            Toast.makeText(this, "Error Deleting Student", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+
+
+
+******************************************************************************************************
+
+StudenDatabaseHelper.kt
+
+
+
+
+package com.example.student_info
+
+import android.content.ContentValues
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+import android.database.Cursor
+
+class StudentDatabaseHelper(context: Context) :
+    SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+    companion object {
+        private const val DATABASE_NAME = "student_info.db"
+        private const val DATABASE_VERSION = 1
+        const val TABLE_NAME = "students"
+        const val COL_ID = "id"
+        const val COL_ROLL_NO = "roll_no"
+        const val COL_NAME = "name"
+        const val COL_AGE = "age"
+    }
+
+    override fun onCreate(db: SQLiteDatabase?) {
+        val createTableQuery = """
+            CREATE TABLE $TABLE_NAME (
+                $COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COL_ROLL_NO TEXT,
+                $COL_NAME TEXT,
+                $COL_AGE INTEGER
+            )
+        """
+        db?.execSQL(createTableQuery)
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+        onCreate(db)
+    }
+
+    // Insert student data into the database
+    fun insertStudent(rollNo: String, name: String, age: Int): Long {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put(COL_ROLL_NO, rollNo)
+        values.put(COL_NAME, name)
+        values.put(COL_AGE, age)
+
+        // Insert data and return the result
+        return db.insert(TABLE_NAME, null, values)
+    }
+
+    // Delete a student by their ID
+    fun deleteStudent(studentId: Int): Int {
+        val db = writableDatabase
+        val whereClause = "$COL_ID = ?"
+        val whereArgs = arrayOf(studentId.toString())
+
+        // Delete student data and return the result
+        return db.delete(TABLE_NAME, whereClause, whereArgs)
+    }
+
+    // Fetch all students from the database
+    fun getAllStudents(): Cursor {
+        val db = readableDatabase
+        return db.query(TABLE_NAME, null, null, null, null, null, null)
+    }
+}
+
+
+
+
+*************************************************************************************************
+
+Student.kt
+
+
+
+
+package com.example.student_info
+
+data class Student(
+    val id: Int,
+    val rollNo: String,
+    val name: String,
+    val age: Int
+)
+
+
+
+
+
+
+

@@ -1,0 +1,250 @@
+APPLICATION NAME : Employee_Info
+
+****************************************************************
+
+activity.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/edtId"
+        android:hint="Employee ID"
+        android:inputType="number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/edtName"
+        android:hint="Employee Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/edtSalary"
+        android:hint="Employee Salary"
+        android:inputType="numberDecimal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnInsert"
+        android:text="Insert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnUpdate"
+        android:text="Update"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnDelete"
+        android:text="Delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
+
+
+********************************************************************************
+
+activity.kt
+
+
+
+
+package com.example.employee_info
+
+import android.database.Cursor
+import android.os.Bundle
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var dbHelper: EmployeeDBHelper
+    private lateinit var listView: ListView
+    private lateinit var adapter: ArrayAdapter<String>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        dbHelper = EmployeeDBHelper(this)
+
+        val edtId = findViewById<EditText>(R.id.edtId)
+        val edtName = findViewById<EditText>(R.id.edtName)
+        val edtSalary = findViewById<EditText>(R.id.edtSalary)
+
+        val btnInsert = findViewById<Button>(R.id.btnInsert)
+        val btnUpdate = findViewById<Button>(R.id.btnUpdate)
+        val btnDelete = findViewById<Button>(R.id.btnDelete)
+
+        listView = findViewById(R.id.listView)
+
+        btnInsert.setOnClickListener {
+            val id = edtId.text.toString().toInt()
+            val name = edtName.text.toString()
+            val salary = edtSalary.text.toString().toDouble()
+            if (dbHelper.insertEmployee(id, name, salary)) {
+                showToast("Employee Inserted")
+                refreshList()
+            } else {
+                showToast("Insert Failed")
+            }
+        }
+
+        btnUpdate.setOnClickListener {
+            val id = edtId.text.toString().toInt()
+            val name = edtName.text.toString()
+            val salary = edtSalary.text.toString().toDouble()
+            if (dbHelper.updateEmployee(id, name, salary)) {
+                showToast("Employee Updated")
+                refreshList()
+            } else {
+                showToast("Update Failed")
+            }
+        }
+
+        btnDelete.setOnClickListener {
+            val id = edtId.text.toString().toInt()
+            if (dbHelper.deleteEmployee(id)) {
+                showToast("Employee Deleted")
+                refreshList()
+            } else {
+                showToast("Delete Failed")
+            }
+        }
+
+        refreshList()
+    }
+
+    private fun refreshList() {
+        val list = mutableListOf<String>()
+        val cursor: Cursor = dbHelper.getAllEmployees()
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+            val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+            val salary = cursor.getDouble(cursor.getColumnIndexOrThrow("salary"))
+            list.add("ID: $id\nName: $name\nSalary: $salary")
+        }
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, list)
+        listView.adapter = adapter
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    }
+}
+
+
+
+***********************************************************************
+
+
+EmployeeDBHelper.kt
+
+
+
+package com.example.employee_info
+
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+
+class EmployeeDBHelper(context: Context) :
+    SQLiteOpenHelper(context, "EmployeeDB", null, 1) {
+
+    override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE employee(" +
+                    "id INTEGER PRIMARY KEY, " +
+                    "name TEXT, " +
+                    "salary REAL)"
+        )
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS employee")
+        onCreate(db)
+    }
+
+    fun insertEmployee(id: Int, name: String, salary: Double): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put("id", id)
+            put("name", name)
+            put("salary", salary)
+        }
+        val result = db.insert("employee", null, values)
+        return result != -1L
+    }
+
+    fun updateEmployee(id: Int, name: String, salary: Double): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put("name", name)
+            put("salary", salary)
+        }
+        val result = db.update("employee", values, "id = ?", arrayOf(id.toString()))
+        return result > 0
+    }
+
+    fun deleteEmployee(id: Int): Boolean {
+        val db = this.writableDatabase
+        val result = db.delete("employee", "id = ?", arrayOf(id.toString()))
+        return result > 0
+    }
+
+    fun getAllEmployees(): Cursor {
+        val db = this.readableDatabase
+        return db.rawQuery("SELECT * FROM employee", null)
+    }
+}
+
+
+*******************************************************************************
+
+
+AndroidManifest.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.employee_info">
+
+    <application
+        android:allowBackup="true"
+        android:label="Employee Info"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
+</manifest>

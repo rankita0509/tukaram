@@ -1,0 +1,160 @@
+APPLICATION NAME  : pass_data_from_one_activity_to_another_activity
+
+
+********************************************************************
+
+Activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/editText"
+        android:hint="Enter message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/sendButton"
+        android:text="Send Message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
+
+
+
+*************************************************
+
+activity.kt
+
+
+
+
+package com.example.pass_data_from_one_activity_to_another_activity
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val editText = findViewById<EditText>(R.id.editText)
+        val button = findViewById<Button>(R.id.sendButton)
+
+        button.setOnClickListener {
+            val message = editText.text.toString()
+
+            // Create Intent to pass data to SecondActivity
+            val intent = Intent(this, SecondActivity::class.java)
+            intent.putExtra("EXTRA_MESSAGE", message)
+
+            startActivity(intent)
+        }
+    }
+}
+
+
+
+************************************
+
+SecondActivity.kt
+
+
+
+package com.example.pass_data_from_one_activity_to_another_activity
+
+import android.os.Bundle
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+
+class SecondActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_second)
+
+        val textView = findViewById<TextView>(R.id.receivedMessage)
+
+        // Retrieve the data passed from MainActivity
+        val message = intent.getStringExtra("EXTRA_MESSAGE")
+        textView.text = message ?: "No message received"
+    }
+}
+
+
+
+**********************************************************************
+
+Activity_second.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/receivedMessage"
+        android:text="Waiting for message..."
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+
+
+
+
+**************************************************************
+
+
+AndroidMenifest.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.pass_data_from_one_activity_to_another_activity">
+
+    <application
+        android:allowBackup="true"
+        android:label="Pass Data App"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light"> <!-- Use default AppCompat theme -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".SecondActivity"
+            android:exported="true"/>
+    </application>
+
+</manifest>
+
+
+
+

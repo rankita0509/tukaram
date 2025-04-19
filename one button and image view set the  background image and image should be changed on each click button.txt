@@ -1,0 +1,108 @@
+APPLICATION NAME : alternative_image_clicking
+
+
+*************************************************
+activity.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"> <!-- This should now work -->
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img1" />
+
+    <Button
+        android:id="@+id/btnChangeImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change Image"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/imageView"
+        android:layout_marginTop="24dp" />
+</RelativeLayout>
+
+
+
+
+****************************************************************
+
+
+
+activity.kt
+
+
+
+
+
+package com.example.alternative_images_clickin
+
+import android.os.Bundle
+import android.widget.Button
+import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    private var toggle = true
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val imageView = findViewById<ImageView>(R.id.imageView)
+        val button = findViewById<Button>(R.id.btnChangeImage)
+
+        button.setOnClickListener {
+            if (toggle) {
+                imageView.setImageResource(R.drawable.background)
+            } else {
+                imageView.setImageResource(R.drawable.img1)
+            }
+            toggle = !toggle
+        }
+    }
+}
+
+
+
+
+*************************************************************************
+
+AndroidManifest.xml
+
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.alternative_images_clickin">
+
+    <application
+        android:allowBackup="true"
+        android:label="Alternative Images Click App"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round">
+
+        <!-- Main Activity -->
+        <activity android:name=".MainActivity"
+            android:label="Main Activity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
+
+
+

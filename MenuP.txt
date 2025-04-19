@@ -1,0 +1,139 @@
+APPLICATION NAME : MenuP
+
+
+************************************************************************************************
+
+mainactivity.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/textView"
+        android:text="MenuP - Options Menu Demo"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+
+
+
+**********************************************************************
+
+
+mainactivity.kt
+
+
+package com.example.menup
+
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        // Disable "Compose Email"
+        menu?.findItem(R.id.menu_compose)?.isEnabled = false
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_settings -> {
+                Toast.makeText(this, "Settings Selected", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.menu_search -> {
+                Toast.makeText(this, "Search Selected", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.menu_feedback -> {
+                Toast.makeText(this, "Feedback Selected", Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+}
+
+
+
+
+*************************************************************************
+
+
+app/src/main/res/menu/main_menu.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_settings"
+        android:title="Settings" />
+
+    <item
+        android:id="@+id/menu_search"
+        android:title="Search" />
+
+    <item
+        android:id="@+id/menu_compose"
+        android:title="Compose Email" />
+
+    <item
+        android:id="@+id/menu_feedback"
+        android:title="Feedback" />
+</menu>
+
+
+*********************************************************************************
+
+
+
+AndroidManifest.xml
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.menup">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="MenuP"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MenuP">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"> <!-- Required for launcher activity -->
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

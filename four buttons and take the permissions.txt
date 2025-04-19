@@ -1,0 +1,162 @@
+APPLICATION NAME : permissions_with_buttons
+********************************************************
+
+
+activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/btnContacts"
+        android:text="Request Contacts Permission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnCalendar"
+        android:text="Request Calendar Permission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnCamera"
+        android:text="Request Camera Permission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnGallery"
+        android:text="Request Storage Permission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
+
+
+
+******************************************************************
+
+
+activity.kt
+
+
+
+package com.example.permissions_with_buttons
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
+class MainActivity : AppCompatActivity() {
+
+    private val REQUEST_CONTACTS = 1
+    private val REQUEST_CALENDAR = 2
+    private val REQUEST_CAMERA = 3
+    private val REQUEST_STORAGE = 4
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        findViewById<Button>(R.id.btnContacts).setOnClickListener {
+            requestPermission(Manifest.permission.READ_CONTACTS, REQUEST_CONTACTS)
+        }
+
+        findViewById<Button>(R.id.btnCalendar).setOnClickListener {
+            requestPermission(Manifest.permission.READ_CALENDAR, REQUEST_CALENDAR)
+        }
+
+        findViewById<Button>(R.id.btnCamera).setOnClickListener {
+            requestPermission(Manifest.permission.CAMERA, REQUEST_CAMERA)
+        }
+
+        findViewById<Button>(R.id.btnGallery).setOnClickListener {
+            requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_STORAGE)
+        }
+    }
+
+    private fun requestPermission(permission: String, requestCode: Int) {
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(permission), requestCode)
+        } else {
+            Toast.makeText(this, "Permission already granted!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permission Granted!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+
+
+
+*******************************************************************************
+
+
+AndroidManifest.xml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.permissions_with_buttons">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:label="Permissions Buttons"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round">
+
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+
+
+
+
+
+**************

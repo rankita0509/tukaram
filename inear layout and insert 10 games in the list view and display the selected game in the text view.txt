@@ -1,0 +1,121 @@
+APPLICATION NAME : listview_10_games
+
+
+******************************************************************************************************
+
+activity.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ListView
+        android:id="@+id/listViewGames"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp" />
+
+    <TextView
+        android:id="@+id/textViewSelectedGame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Selected Game:"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:padding="16dp" />
+</LinearLayout>
+
+
+
+***************************************************************************************
+
+
+activity.kt
+
+
+
+package com.example.listview_10_games
+
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.ListView
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var listViewGames: ListView
+    private lateinit var textViewSelectedGame: TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        listViewGames = findViewById(R.id.listViewGames)
+        textViewSelectedGame = findViewById(R.id.textViewSelectedGame)
+
+        val games = listOf(
+            "Minecraft",
+            "Fortnite",
+            "Among Us",
+            "Call of Duty",
+            "Clash of Clans",
+            "PUBG Mobile",
+            "Asphalt 9",
+            "Free Fire",
+            "Candy Crush",
+            "Valorant"
+        )
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, games)
+        listViewGames.adapter = adapter
+
+        listViewGames.setOnItemClickListener { _, _, position, _ ->
+            val selectedGame = games[position]
+            textViewSelectedGame.text = "Selected Game: $selectedGame"
+        }
+    }
+}
+
+
+
+
+
+************************************************************************
+AndroidManyfest.xml
+
+
+
+
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.listview_10_games">
+
+    <application
+        android:allowBackup="true"
+        android:label="ListView Games"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+
+        <activity android:name=".MainActivity"
+            android:exported="true"> <!-- ✅ This line is required -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
+
+
+
+

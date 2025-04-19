@@ -1,0 +1,142 @@
+APPLICATION NAMe : clickable_and_nonclickable_notification
+********************************************************************
+
+activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <!-- Button to trigger notifications -->
+    <Button
+        android:id="@+id/buttonShowNotifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Notifications"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+*****************************************************************************************
+
+activity.kt
+
+
+
+package com.example.clickable_and_nonclickable_notification
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import android.app.PendingIntent
+
+
+class MainActivity : AppCompatActivity() {
+
+    private val channelId = "example_channel"
+    private val notificationId1 = 1
+    private val notificationId2 = 2
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Create notification channel for Android Oreo and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Example Channel", NotificationManager.IMPORTANCE_DEFAULT)
+            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Button to show notifications
+        val buttonShowNotifications: Button = findViewById(R.id.buttonShowNotifications)
+        buttonShowNotifications.setOnClickListener {
+            showNotifications()
+        }
+    }
+
+    private fun showNotifications() {
+        // Non-clickable notification
+        val nonClickableNotification: Notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("Non-clickable Notification")
+            .setContentText("This notification doesn't do anything when clicked.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        // Clickable notification (reload app on click)
+        val reloadAppIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, reloadAppIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val clickableNotification: Notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("Clickable Notification")
+            .setContentText("This notification reloads the app when clicked.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent) // Set click action
+            .setAutoCancel(true) // Auto dismiss after clicking
+            .build()
+
+        // Get the NotificationManager and issue the notifications
+        val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(this)
+        notificationManager.notify(notificationId1, nonClickableNotification)
+        notificationManager.notify(notificationId2, clickableNotification)
+    }
+}
+
+
+
+***************************************************************************************************************
+
+
+manifest
+
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.clickable_and_nonclickable_notification">
+
+    <application
+        android:allowBackup="true"
+        android:label="Clickable and Non-Clickable Notification"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light"> <!-- Using AppCompat theme -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+
+
+
+

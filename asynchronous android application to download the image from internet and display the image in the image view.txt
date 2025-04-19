@@ -1,0 +1,142 @@
+APPLICATION NAME : image_download_threading
+**********************************************************
+
+activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- Button to start image download -->
+    <Button
+        android:id="@+id/btnDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Download Image" />
+
+    <!-- ImageView to display the downloaded image -->
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Downloaded Image" />
+
+</LinearLayout>
+
+
+
+*********************************************************
+
+
+activity.kt
+
+
+package com.example.image_download_threading
+
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.AsyncTask
+import android.os.Bundle
+import android.widget.Button
+import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+import java.io.InputStream
+import java.net.URL
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var btnDownload: Button
+    private lateinit var imageView: ImageView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Initialize views
+        btnDownload = findViewById(R.id.btnDownload)
+        imageView = findViewById(R.id.imageView)
+
+        // Set click listener on the download button
+        btnDownload.setOnClickListener {
+            // URL of the image you want to download
+            val imageUrl = "https://www.example.com/sample-image.jpg"  // Replace with your image URL
+            // Start the AsyncTask to download the image
+            ImageDownloadTask().execute(imageUrl)
+        }
+    }
+
+    // AsyncTask to download the image in the background
+    private inner class ImageDownloadTask : AsyncTask<String, Void, Bitmap?>() {
+
+        override fun doInBackground(vararg params: String?): Bitmap? {
+            return try {
+                val url = URL(params[0])
+                val inputStream: InputStream = url.openStream()
+                BitmapFactory.decodeStream(inputStream) // Convert the input stream to Bitmap
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+
+        override fun onPostExecute(result: Bitmap?) {
+            super.onPostExecute(result)
+            if (result != null) {
+                // Set the downloaded image in the ImageView
+                imageView.setImageBitmap(result)
+            } else {
+                // If there was an error, show the error image
+                imageView.setImageResource(R.drawable.ic_error) // This is your error image
+            }
+        }
+    }
+}
+
+
+
+******************************************************
+
+
+
+AndroidManifest.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.image_download_threading">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Image_download_threading"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
+</manifest>
+
+
+**************************************************************************

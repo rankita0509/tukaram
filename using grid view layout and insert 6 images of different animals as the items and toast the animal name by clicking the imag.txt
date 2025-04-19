@@ -1,0 +1,119 @@
+APPLICATION NAME : gridviewandinsert6images
+
+******************************************************************
+activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <GridView
+        android:id="@+id/gridView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="3"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"
+        android:gravity="center"
+        android:stretchMode="columnWidth" />
+</LinearLayout>
+
+
+
+***********************************************
+activity.kt
+
+
+
+package com.example.gridviewandinsert6images
+
+import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.BaseAdapter
+import android.widget.GridView
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    private val animalNames = arrayOf("Cat", "Dog", "Elephant", "Lion", "Monkey", "Tiger")
+    private val animalImages = arrayOf(
+        R.drawable.img,     // Add actual images in res/drawable folder
+        R.drawable.img_1,
+        R.drawable.img_2,
+        R.drawable.img_3,
+        R.drawable.img_4,
+        R.drawable.img_5
+    )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val gridView = findViewById<GridView>(R.id.gridView)
+        val adapter = AnimalAdapter()
+        gridView.adapter = adapter
+
+        gridView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+            Toast.makeText(this, "You clicked: ${animalNames[position]}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    inner class AnimalAdapter : BaseAdapter() {
+        override fun getCount(): Int = animalImages.size
+
+        override fun getItem(position: Int): Any = animalImages[position]
+
+        override fun getItemId(position: Int): Long = position.toLong()
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            val imageView = ImageView(this@MainActivity)
+            imageView.setImageResource(animalImages[position])
+            imageView.layoutParams = ViewGroup.LayoutParams(300, 300)
+            imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+            return imageView
+        }
+    }
+}
+
+
+
+***********************************************
+
+AndroidManifest.xml
+
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.gridviewandinsert6images">
+
+    <application
+        android:allowBackup="true"
+        android:label="GridView Animals"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
+
+
+
+
+
+

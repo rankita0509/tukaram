@@ -1,0 +1,247 @@
+APPLICATION NAME  :  menupractical
+
+
+**************************************************************************************************************
+
+
+main activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mylay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Menu"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.175" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Color Change Dialog"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.364" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Custom Dialog"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.559" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+*************************************************************************************************
+
+
+mainacitivity.kt
+
+package com.example.menupractical
+
+import android.app.AlertDialog
+import android.graphics.Color
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.PopupMenu
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Popup Menu on Button Click
+        button.setOnClickListener {
+            val popup = PopupMenu(this, button)
+            menuInflater.inflate(R.menu.my_menu, popup.menu)
+            popup.show()
+
+            popup.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.i1 -> mylay.setBackgroundColor(Color.CYAN)
+                    R.id.i2 -> Toast.makeText(this, "Hello SRM", Toast.LENGTH_SHORT).show()
+                    R.id.i3 -> finishAffinity() // better than System.exit(0)
+                }
+                true
+            }
+        }
+
+        // Alert Dialog on Button Click
+        button2.setOnClickListener {
+            val dialog = AlertDialog.Builder(this)
+            dialog.setTitle("Change Color")
+            dialog.setMessage("Do you want to change the background color?")
+            dialog.setPositiveButton("Yes") { _, _ ->
+                mylay.setBackgroundColor(Color.YELLOW)
+            }
+            dialog.setNegativeButton("No") { _, _ ->
+                Toast.makeText(this, "No Change", Toast.LENGTH_SHORT).show()
+            }
+            dialog.setNeutralButton("Nothing") { _, _ ->
+                Toast.makeText(this, "Nothing", Toast.LENGTH_SHORT).show()
+            }
+            dialog.create().show()
+        }
+
+        // Custom Dialog
+        button3.setOnClickListener {
+            val dialog = MyOwnDialog()
+            dialog.show(supportFragmentManager, "CustomDialog")
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.my_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.i1 -> mylay.setBackgroundColor(Color.MAGENTA)
+            R.id.i2 -> Toast.makeText(this, "Hello SRM", Toast.LENGTH_SHORT).show()
+            R.id.i3 -> finishAffinity()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onBackPressed() {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setTitle("Close")
+        dialog.setMessage("Do you want to close the app?")
+        dialog.setPositiveButton("Yes") { _, _ -> finishAffinity() }
+        dialog.setNegativeButton("No") { _, _ ->
+            Toast.makeText(this, "No Change", Toast.LENGTH_SHORT).show()
+        }
+        dialog.setNeutralButton("Nothing") { _, _ ->
+            Toast.makeText(this, "Nothing", Toast.LENGTH_SHORT).show()
+        }
+        dialog.create().show()
+    }
+}
+
+
+***********************************************************************************************************************
+
+
+
+res/menu/my_menu.xml
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/main"
+        android:title="Main Menu">
+        <menu>
+            <item android:id="@+id/i1"
+                android:title="Change Color"/>
+            <item android:id="@+id/i2"
+                android:title="Toast"/>
+            <item android:id="@+id/i3"
+                android:title="Exit"/>
+            <item android:id="@+id/dis"
+                android:title="Option"
+                android:enabled="false" />
+        </menu>
+    </item>
+</menu>
+
+
+
+*******************************************************************************************************************
+
+
+res/layout/my_dialog.xml
+
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/txt"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter your data:" />
+
+    <Button
+        android:id="@+id/btnsubmit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="120dp"
+        android:layout_y="50dp"
+        android:text="Submit" />
+</AbsoluteLayout>
+
+
+
+******************************************************************************************************************
+
+
+
+src/main/java/com/example/menupractical/MyOwnDialog.kt
+
+
+
+package com.example.menupractical
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.DialogFragment
+import kotlinx.android.synthetic.main.my_dialog.view.*
+
+class MyOwnDialog : DialogFragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val root = inflater.inflate(R.layout.my_dialog, container, false)
+
+        root.btnsubmit.setOnClickListener {
+            val data = root.txt.text.toString()
+            Toast.makeText(context, data, Toast.LENGTH_SHORT).show()
+            dismiss()
+        }
+
+        return root
+    }
+}
+
+
+
+
+

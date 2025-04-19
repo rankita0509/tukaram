@@ -1,0 +1,237 @@
+APPLICATION NAME : databaser
+
+
+**************************************************************************************************************************
+
+mainactivity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/un"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:ems="10"
+        android:hint="Enter Username"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.062" />
+
+    <EditText
+        android:id="@+id/pass"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:ems="10"
+        android:hint="Enter Password"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/un"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        app:layout_constraintTop_toBottomOf="@id/pass"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Read"
+        app:layout_constraintTop_toBottomOf="@id/pass"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Check"
+        app:layout_constraintTop_toBottomOf="@id/button2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change Pass"
+        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <ListView
+        android:id="@+id/userList"
+        android:layout_width="0dp"
+        android:layout_height="400dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintTop_toBottomOf="@id/button4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+*****************************************************************************************************************************************
+
+
+
+mainactivity.kt
+
+
+package com.example.databaser
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val mydatabase = TyitDatabaseHelper(this)
+
+        button.setOnClickListener {
+            val unVal = un.text.toString()
+            val passVal = pass.text.toString()
+            mydatabase.saveUser(unVal, passVal)
+        }
+
+        button2.setOnClickListener {
+            val userData = mydatabase.readUsers()
+            val ad = ArrayAdapter(this, android.R.layout.simple_list_item_1, userData)
+            userList.adapter = ad
+        }
+
+        userList.setOnItemClickListener { _, _, i, _ ->
+            val data = userList.getItemAtPosition(i).toString()
+            Toast.makeText(this, data, Toast.LENGTH_SHORT).show()
+        }
+
+        userList.setOnItemLongClickListener { _, _, i, _ ->
+            val id = userList.getItemIdAtPosition(i).toString()[0]
+            mydatabase.deleteUser(id.digitToInt())
+            true
+        }
+
+        button3.setOnClickListener {
+            if (mydatabase.checkUser(un.text.toString(), pass.text.toString())) {
+                Toast.makeText(this, "Valid User", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Invalid User", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        button4.setOnClickListener {
+            if (mydatabase.changePass(un.text.toString(), pass.text.toString())) {
+                Toast.makeText(this, "Password Changed!!!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Error!!!!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+}
+
+
+
+***********************************************************************************************
+
+
+src/main/java/com/example/mydbapp/TyitDatabaseHelper.kt
+
+
+
+
+
+
+package com.example.databaser
+
+import android.content.ContentValues
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+import android.widget.Toast
+
+class TyitDatabaseHelper(var context: Context) : SQLiteOpenHelper(context, "TYIT2025", null, 1) {
+    override fun onCreate(db: SQLiteDatabase?) {
+        val createTable = "CREATE TABLE users(id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(20), password VARCHAR(20))"
+        db?.execSQL(createTable)
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        // For now, you can leave this empty or drop and recreate the table
+    }
+
+    fun saveUser(username: String, pass: String) {
+        val db = this.writableDatabase
+        val cv = ContentValues()
+        cv.put("username", username)
+        cv.put("password", pass)
+        val res = db.insert("users", null, cv)
+        if (res > 1) {
+            Toast.makeText(context, "Inserted Successfully", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Error!!!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun readUsers(): ArrayList<String> {
+        val userData = ArrayList<String>()
+        val db = this.readableDatabase
+        val rec = db.rawQuery("SELECT * FROM users", null)
+        if (rec.moveToFirst()) {
+            do {
+                val data = "${rec.getString(0)} ${rec.getString(1)} ${rec.getString(2)}"
+                userData.add(data)
+            } while (rec.moveToNext())
+        }
+        return userData
+    }
+
+    fun deleteUser(uid: Int) {
+        val db = this.writableDatabase
+        val res = db.delete("users", "id=$uid", null) > 0
+        if (res) {
+            Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Error!!!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun checkUser(un: String, pass: String): Boolean {
+        val db = this.readableDatabase
+        val res = db.rawQuery("SELECT * FROM users WHERE username='$un' AND password='$pass'", null)
+        return res.count == 1
+    }
+
+    fun changePass(username: String, newPassword: String): Boolean {
+        val db = this.writableDatabase
+        val cv = ContentValues()
+        cv.put("password", newPassword)
+        val result = db.update("users", cv, "username=?", arrayOf(username))
+        return result > 0
+    }
+}

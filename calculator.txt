@@ -1,0 +1,156 @@
+APPLICATION NAME : calculator
+
+
+********************************************************************************************
+
+mainactivity.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+
+        <TextView
+            android:id="@+id/res"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text=""
+            android:textSize="40dp"
+            android:gravity="right" />
+
+        <!-- Buttons Rows -->
+        <TableRow>
+            <Button android:id="@+id/modulo" android:text="%" />
+            <Button android:id="@+id/ce" android:text="CE" />
+            <Button android:id="@+id/ac" android:text="AC" />
+            <Button android:id="@+id/clear" android:text="Clear" />
+        </TableRow>
+
+        <TableRow>
+            <Button android:id="@+id/one" android:text="1" />
+            <Button android:id="@+id/two" android:text="2" />
+            <Button android:id="@+id/three" android:text="3" />
+            <Button android:id="@+id/add" android:text="+" />
+        </TableRow>
+
+        <TableRow>
+            <Button android:id="@+id/four" android:text="4" />
+            <Button android:id="@+id/five" android:text="5" />
+            <Button android:id="@+id/six" android:text="6" />
+            <Button android:id="@+id/sub" android:text="-" />
+        </TableRow>
+
+        <TableRow>
+            <Button android:id="@+id/seven" android:text="7" />
+            <Button android:id="@+id/eight" android:text="8" />
+            <Button android:id="@+id/nine" android:text="9" />
+            <Button android:id="@+id/mul" android:text="×" />
+        </TableRow>
+
+        <TableRow>
+            <Button android:id="@+id/zero" android:text="0" />
+            <Button android:id="@+id/point" android:text="." />
+            <Button android:id="@+id/equal" android:text="=" />
+            <Button android:id="@+id/div" android:text="/" />
+        </TableRow>
+    </TableLayout>
+</LinearLayout>
+
+
+
+
+
+***********************************************************************************************************
+
+
+
+
+
+mainactivity.kt
+
+
+package com.example.calculator
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+    var lhs = 0.0
+    var rhs = 0.0
+    var op = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        one.setOnClickListener { res.append("1") }
+        two.setOnClickListener { res.append("2") }
+        three.setOnClickListener { res.append("3") }
+        four.setOnClickListener { res.append("4") }
+        five.setOnClickListener { res.append("5") }
+        six.setOnClickListener { res.append("6") }
+        seven.setOnClickListener { res.append("7") }
+        eight.setOnClickListener { res.append("8") }
+        nine.setOnClickListener { res.append("9") }
+        zero.setOnClickListener { res.append("0") }
+        point.setOnClickListener { res.append(".") }
+
+        clear.setOnClickListener {
+            lhs = 0.0
+            rhs = 0.0
+            res.text = ""
+        }
+
+        add.setOnClickListener {
+            lhs = res.text.toString().toDouble()
+            res.text = ""
+            op = 1
+        }
+        sub.setOnClickListener {
+            lhs = res.text.toString().toDouble()
+            res.text = ""
+            op = 2
+        }
+        mul.setOnClickListener {
+            lhs = res.text.toString().toDouble()
+            res.text = ""
+            op = 3
+        }
+        div.setOnClickListener {
+            lhs = res.text.toString().toDouble()
+            res.text = ""
+            op = 4
+        }
+        modulo.setOnClickListener {
+            lhs = res.text.toString().toDouble()
+            res.text = ""
+            op = 5
+        }
+
+        equal.setOnClickListener {
+            rhs = res.text.toString().toDouble()
+            val result = when (op) {
+                1 -> lhs + rhs
+                2 -> lhs - rhs
+                3 -> lhs * rhs
+                4 -> lhs / rhs
+                5 -> lhs % rhs
+                else -> 0.0
+            }
+            res.text = result.toString()
+        }
+    }
+}
+
+

@@ -1,0 +1,107 @@
+APPLICATION NAME : video
+
+***************************************************************************************************************
+
+
+mainactivity.xml
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <VideoView
+        android:id="@+id/videoView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginBottom="16dp" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play Video"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>
+
+
+
+
+
+************************************************************************************************
+
+
+
+
+mainactivity.kt
+
+
+
+
+package com.example.video
+
+import android.net.Uri
+import android.os.Bundle
+import android.os.Handler
+import android.widget.MediaController
+import android.widget.SeekBar
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+
+    private val handler = Handler()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val videoUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.video)
+        videoView.setVideoURI(videoUri)
+
+        val mediaController = MediaController(this)
+        videoView.setMediaController(mediaController)
+        mediaController.setAnchorView(videoView)
+
+        button.setOnClickListener {
+            videoView.start()
+        }
+
+        seekBar.max = videoView.duration
+
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                if (videoView.isPlaying) {
+                    seekBar.progress = videoView.currentPosition
+                }
+                handler.postDelayed(this, 1000)
+            }
+        }, 0)
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onStartTrackingTouch(p0: SeekBar?) {}
+
+            override fun onProgressChanged(p0: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    videoView.seekTo(progress)
+                }
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {}
+        })
+    }
+}
+
+
+
